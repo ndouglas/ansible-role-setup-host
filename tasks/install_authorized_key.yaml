@@ -1,0 +1,7 @@
+---
+
+- name: 'Set authorized key for non-root user.'
+  ansible.posix.authorized_key:
+    user: "{{ user }}"
+    state: 'present'
+    key: "{{ ssh_public_key }}"
