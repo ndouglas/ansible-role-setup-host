@@ -6,5 +6,3 @@
     value: "{{ item.value }}"
   loop:
     "{{ gitconfig | dict2items }}"
-  tags:
-    - 'focus'
