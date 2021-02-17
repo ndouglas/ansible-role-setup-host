@@ -1,0 +1,32 @@
+---
+- name: 'Set a fact for the local path to the public key to register with GitHub.'
+  ansible.builtin.set_fact:
+    github_ssh_key_path: "{{ ansible_env.HOME }}/.ssh/{{ github_ssh_key_name }}"
+
+- name: 'Gather some information about the SSH key.'
+  ansible.builtin.stat:
+    path: "{{ github_ssh_key_path }}"
+  register: 'github_ssh_key_file'
+
+- name: 'Set some facts based on what we''ve learned so far.'
+  ansible.builtin.set_fact:
+    github_ssh_key_file_exists: "{{ github_ssh_key_file.stat.exists }}"
+
+- name: 'If not already present, generate a special key for GitHub.'
+  ansible.builtin.openssh_keypair:
+    comment: "{{ user }}@{{ ansible_hostname }}"
+    path: "{{ github_ssh_key_path }}"
+    regenerate: 'full_idempotence'
+    size: 4096
+  when: not github_ssh_key_file_exists
+
+- name: 'Read GitHub SSH key.'
+  ansible.builtin.command:
+    cmd: "cat {{ ( github_ssh_key_path + '.pub' ) | quote }}"
+  register: 'github_ssh_key_contents'
+
+- name: 'Set GitHub SSH key.'
+  community.general.github_key:
+    name: "{{ user }}@{{ ansible_hostname }}"
+    token: "{{ github_access_token }}"
+    pubkey: "{{ github_ssh_key_contents.stdout }}"
