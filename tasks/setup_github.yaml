@@ -30,3 +30,17 @@
     name: "{{ user }}@{{ ansible_hostname }}"
     token: "{{ github_access_token }}"
     pubkey: "{{ github_ssh_key_contents.stdout }}"
+
+- name: 'Set GitHub SSH config.'
+  ansible.builtin.copy:
+    dest: "{{ ssh_config_dir }}/github"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0600'
+    backup: yes
+    content: |
+      # GitHub
+      Host github github.com
+      User git
+      IdentityFile ~/.ssh/{{ github_ssh_key_name }}
+      Hostname github.com

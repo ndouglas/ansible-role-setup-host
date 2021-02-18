@@ -1,0 +1,24 @@
+---
+- name: 'Set facts for the SSH config file path.'
+  ansible.builtin.set_fact:
+    ssh_config_path: "{{ ansible_env.HOME }}/.ssh/config"
+    ssh_config_dir: "{{ ansible_env.HOME }}/.ssh/config.d"
+
+- name: 'Create the SSH config directory.'
+  ansible.builtin.file:
+    path: "{{ ssh_config_dir }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0700'
+    state: directory
+
+- name: 'Set up the new SSH config file.'
+  ansible.builtin.copy:
+    dest: "{{ ssh_config_path }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0600'
+    backup: yes
+    content: |
+      Include config.d/*
+      Include config.local
